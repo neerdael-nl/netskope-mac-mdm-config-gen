@@ -67,7 +67,8 @@ function App() {
   return (
     <div className="App">
       <div className="container">
-        <h1>Netskope Intune MDM Script Generator</h1>
+        <h1>Netskope MDM Script Generator</h1>
+        <h2>JAMF, Workspace ONE and Microsoft Intune (Khandji support coming soon)</h2>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="tenantName">Tenant Name *</label>
