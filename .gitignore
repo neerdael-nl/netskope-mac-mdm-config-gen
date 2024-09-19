@@ -41,6 +41,8 @@ Thumbs.db
 
 # Docker related
 docker-compose.override.yml
+build-and-push.sh
+
 
 # Misc
 *.log
