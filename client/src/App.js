@@ -10,15 +10,43 @@ function App() {
     topLevelDomain: 'goskope.com',
     organizationKey: '',
     enrollmentAuthToken: '',
-    enrollmentEncryptionToken: ''
+    enrollmentEncryptionToken: '',
+    email: ''
   });
+  const [errors, setErrors] = useState({});
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (errors[e.target.name]) {
+      setErrors({ ...errors, [e.target.name]: '' });
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    if (!formData.tenantName.trim()) {
+      newErrors.tenantName = 'Tenant Name is required';
+    }
+    if (!formData.organizationKey.trim()) {
+      newErrors.organizationKey = 'Organization Key is required';
+    }
+    if (formData.email && !isValidEmail(formData.email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const isValidEmail = (email) => {
+    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(String(email).toLowerCase());
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validateForm()) {
+      return;
+    }
     try {
       const response = await axios.post('/api/generate-zip', formData, {
         responseType: 'blob'
@@ -35,13 +63,15 @@ function App() {
     }
   };
 
+  const isFormValid = formData.tenantName.trim() && formData.organizationKey.trim();
+
   return (
     <div className="App">
       <div className="container">
         <h1>Netskope Intune MDM Script Generator</h1>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="tenantName">Tenant Name</label>
+            <label htmlFor="tenantName">Tenant Name *</label>
             <input
               id="tenantName"
               name="tenantName"
@@ -51,14 +81,16 @@ function App() {
               pattern="[^.]*"
               required
             />
+            {errors.tenantName && <div className="error">{errors.tenantName}</div>}
           </div>
           <div className="form-group">
-            <label htmlFor="topLevelDomain">Top Level Domain</label>
+            <label htmlFor="topLevelDomain">Top Level Domain *</label>
             <select
               id="topLevelDomain"
               name="topLevelDomain"
               value={formData.topLevelDomain}
               onChange={handleChange}
+              required
             >
               {topLevelDomains.map(domain => (
                 <option key={domain} value={domain}>{domain}</option>
@@ -66,7 +98,7 @@ function App() {
             </select>
           </div>
           <div className="form-group">
-            <label htmlFor="organizationKey">Organization Key</label>
+            <label htmlFor="organizationKey">Organization Key *</label>
             <input
               id="organizationKey"
               name="organizationKey"
@@ -75,9 +107,10 @@ function App() {
               placeholder="Enter Organization Key"
               required
             />
+            {errors.organizationKey && <div className="error">{errors.organizationKey}</div>}
           </div>
           <div className="form-group">
-            <label htmlFor="enrollmentAuthToken">Enrollment Auth Token (optional)</label>
+            <label htmlFor="enrollmentAuthToken">Enrollment Auth Token (Optional)</label>
             <input
               id="enrollmentAuthToken"
               name="enrollmentAuthToken"
@@ -87,7 +120,7 @@ function App() {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="enrollmentEncryptionToken">Enrollment Encryption Token (optional)</label>
+            <label htmlFor="enrollmentEncryptionToken">Enrollment Encryption Token (Optional)</label>
             <input
               id="enrollmentEncryptionToken"
               name="enrollmentEncryptionToken"
@@ -96,11 +129,21 @@ function App() {
               placeholder="Enter Enrollment Encryption Token"
             />
           </div>
-          <button type="submit">Generate Configuration</button>
+          <div className="form-group">
+            <label htmlFor="email">Email (Optional)</label>
+            <input
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="Enter email for development and testing purposes only"
+            />
+            {errors.email && <div className="error">{errors.email}</div>}
+          </div>
+          <button type="submit" disabled={!isFormValid}>Generate Configuration</button>
         </form>
       </div>
     </div>
   );
-}
 
 export default App;

@@ -11,11 +11,11 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, '../client/build')));
 
 app.post('/api/generate-zip', (req, res) => {
-  const { tenantName, topLevelDomain, organizationKey, enrollmentAuthToken, enrollmentEncryptionToken } = req.body;
+  const { tenantName, topLevelDomain, organizationKey, enrollmentAuthToken, enrollmentEncryptionToken, email } = req.body;
 
   // Generate plist content
   const plistContent = {
-    email: '{{email}}',
+    email: email || '{{email}}',
     addonhost: `addon-${tenantName}.${topLevelDomain}`,
     orgkey: organizationKey
   };
@@ -46,18 +46,8 @@ function generateCustomPreInstallScript(tenantName, topLevelDomain, organization
   // Replace placeholders with actual values
   script = script.replace('{{TENANT_HOST_NAME}}', `addon-${tenantName}.${topLevelDomain}`);
   script = script.replace('{{ORGANIZATION_KEY}}', organizationKey);
-  
-  if (enrollmentAuthToken) {
-    script = script.replace('{{ENROLLMENT_AUTH_TOKEN}}', enrollmentAuthToken);
-  } else {
-    script = script.replace('{{ENROLLMENT_AUTH_TOKEN}}', '');
-  }
-  
-  if (enrollmentEncryptionToken) {
-    script = script.replace('{{ENROLLMENT_ENCRYPTION_TOKEN}}', enrollmentEncryptionToken);
-  } else {
-    script = script.replace('{{ENROLLMENT_ENCRYPTION_TOKEN}}', '');
-  }
+  script = script.replace('{{ENROLLMENT_AUTH_TOKEN}}', enrollmentAuthToken || '');
+  script = script.replace('{{ENROLLMENT_ENCRYPTION_TOKEN}}', enrollmentEncryptionToken || '');
   
   return script;
 }

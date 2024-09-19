@@ -19,6 +19,12 @@ body {
     width: 100%;
     max-width: 500px;
   }
+
+  .error {
+    color: red;
+    font-size: 0.8em;
+    margin-top: 5px;
+  }
   
   h1 {
     text-align: center;
