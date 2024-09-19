@@ -4,7 +4,9 @@ import './App.css';
 
 function App() {
   const topLevelDomains = ['au.goskope.com', 'ca.goskope.com', 'de.goskope.com', 'eu.goskope.com', 'eur.goskope.com', 'fr.goskope.com', 'goskope.com', 'in.goskope.com', 'jp.goskope.com', 'na-eur.goskope.com', 'na.goskope.com', 'uk.goskope.com', 'us.goskope.com'];
+  const mdmPlatforms = ['Microsoft Intune', 'Workspace ONE', 'JAMF', 'Khandji'];
   const [formData, setFormData] = useState({
+    mdmPlatform: 'Microsoft Intune',
     tenantName: '',
     topLevelDomain: 'goskope.com',
     organizationKey: '',
@@ -70,6 +72,20 @@ function App() {
         <h1>Netskope MDM Script Generator</h1>
         <h2>JAMF, Workspace ONE and Microsoft Intune (Khandji support coming soon)</h2>
         <form onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label htmlFor="mdmPlatform">MDM Platform *</label>
+          <select
+            id="mdmPlatform"
+            name="mdmPlatform"
+            value={formData.mdmPlatform}
+            onChange={handleChange}
+            required
+          >
+            {mdmPlatforms.map(platform => (
+              <option key={platform} value={platform}>{platform}</option>
+            ))}
+          </select>
+        </div>
           <div className="form-group">
             <label htmlFor="tenantName">Tenant Name *</label>
             <input
