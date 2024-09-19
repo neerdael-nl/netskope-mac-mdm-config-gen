@@ -9,6 +9,13 @@ This project is a web application that generates custom configuration scripts fo
 - Package all necessary files into a downloadable zip archive
 - Support for optional enrollment tokens for secure enrollment
 
+## To-do
+
+- Add support for Khandji
+- Validate support for Workspace ONE and JAMF
+- Add dropdown selection menu for MDM platform of choice
+- Include installation instructions for MDM platform of choice in pre-packaged zip
+
 ## Prerequisites
 
 - Node.js (v14 or later)
