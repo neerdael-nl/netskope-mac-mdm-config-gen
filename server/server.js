@@ -31,17 +31,17 @@ app.post('/api/generate-zip', (req, res) => {
 
   // Generate and add custom pre-install script
   const preInstallScript = generateCustomPreInstallScript(tenantName, topLevelDomain, organizationKey, enrollmentAuthToken, enrollmentEncryptionToken, email);
-  archive.append(preInstallScript, { name: 'intune-pre-install.sh' });
+  archive.append(preInstallScript, { name: 'pre-install.sh' });
 
   // Add post-install script to zip
-  const postInstallPath = path.join(__dirname, 'scripts', 'intune-post-install.sh');
-  archive.append(fs.createReadStream(postInstallPath), { name: 'intune-post-install.sh' });
+  const postInstallPath = path.join(__dirname, 'scripts', 'post-install.sh');
+  archive.append(fs.createReadStream(postInstallPath), { name: 'post-install.sh' });
 
   archive.finalize();
 });
 
 function generateCustomPreInstallScript(tenantName, topLevelDomain, organizationKey, enrollmentAuthToken, enrollmentEncryptionToken, email) {
-  let script = fs.readFileSync(path.join(__dirname, 'scripts', 'intune-pre-install.sh'), 'utf8');
+  let script = fs.readFileSync(path.join(__dirname, 'scripts', 'pre-install.sh'), 'utf8');
   
   // Replace placeholders with actual values
   script = script.replace('{{TENANT_HOST_NAME}}', `addon-${tenantName}.${topLevelDomain}`);
