@@ -70,7 +70,7 @@ function App() {
     <div className="App">
       <div className="container">
         <h1>Netskope MDM Script Generator</h1>
-        <h2>JAMF, Workspace ONE and Microsoft Intune (Khandji support coming soon)</h2>
+        <h3>JAMF, VMWare Workspace ONE, Kandji and Microsoft Intune (Validation Needed)</h3>
         <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="mdmPlatform">MDM Platform *</label>
