@@ -1,0 +1,7 @@
+services:
+  netskope-intune-mdm-generator:
+    image: johnneerdael/netskope-intune-mdm-generator:latest
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production

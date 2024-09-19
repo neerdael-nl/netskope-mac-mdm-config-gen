@@ -1,0 +1,13 @@
+{
+  "name": "netskope-config-server",
+  "version": "1.0.0",
+  "main": "server.js",
+  "dependencies": {
+    "archiver": "^5.3.1",
+    "express": "^4.17.1",
+    "plist": "^3.0.5"
+  },
+  "scripts": {
+    "start": "node server.js"
+  }
+}
