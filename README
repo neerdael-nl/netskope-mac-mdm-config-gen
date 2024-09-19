@@ -1,4 +1,4 @@
-# Netskope Intune MDM Script Generator
+# Netskope MDM Script Generator (JAMF, Workspace ONE, Microsoft Intune) 
 
 This project is a web application that generates custom configuration scripts for Netskope MDM deployment and support deployment on JAMF, Workspace One and Intune. It consists of a React frontend and a Node.js backend, which work together to create a zip file containing customized installation scripts and configuration files. The easiest and recommended deployment option would be to just use the included docker-compose.yml file.
 
@@ -7,7 +7,7 @@ This project is a web application that generates custom configuration scripts fo
 - Generate custom plist files for Netskope configuration
 - Create pre-install and post-install scripts with user-provided parameters
 - Package all necessary files into a downloadable zip archive
-- Support for optional enrollment tokens
+- Support for optional enrollment tokens for secure enrollment
 
 ## Prerequisites
 
@@ -21,8 +21,8 @@ This project is a web application that generates custom configuration scripts fo
 
 1. Clone the repository:
    ```
-   git clone https://github.com/your-username/netskope-intune-mdm-generator.git
-   cd netskope-intune-mdm-generator
+   git clone https://github.com/neerdael-nl/netskope-mac-mdm-config-gen.git
+   cd netskope-mac-mdm-config-gen
    ```
 
 2. Install dependencies:
@@ -63,12 +63,12 @@ This project is a web application that generates custom configuration scripts fo
 
 2. Build the Docker image:
    ```
-   docker build -t netskope-intune-mdm-generator .
+   docker build -t netskope-mdm-generator .
    ```
 
 3. Run the container:
    ```
-   docker run -p 3001:3001 netskope-intune-mdm-generator
+   docker run -p 3001:3001 netskope-mdm-generator
    ```
 
 4. Open your browser and navigate to `http://localhost:3001`.
@@ -77,12 +77,12 @@ This project is a web application that generates custom configuration scripts fo
 
 1. Pull the image from Docker Hub:
    ```
-   docker pull johnneerdael/netskope-intune-mdm-generator:latest
+   docker pull johnneerdael/netskope-mdm-generator:latest
    ```
 
 2. Run the container:
    ```
-   docker run -p 3001:3001 johnneerdael/netskope-intune-mdm-generator:latest
+   docker run -p 3001:3001 johnneerdael/netskope-mdm-generator:latest
    ```
 
 3. Open your browser and navigate to `http://localhost:3001`.
@@ -93,7 +93,7 @@ This project is a web application that generates custom configuration scripts fo
 
 2. Run the application using Docker Compose:
    ```
-   docker-compose up
+   docker-compose up -d
    ```
 
 3. Open your browser and navigate to `http://localhost:3001`.

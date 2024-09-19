@@ -1,6 +1,6 @@
 services:
-  netskope-intune-mdm-generator:
-    image: johnneerdael/netskope-intune-mdm-generator:latest
+  netskope-mdm-generator:
+    image: johnneerdael/netskope-mdm-generator:latest
     ports:
       - "3001:3001"
     environment:
