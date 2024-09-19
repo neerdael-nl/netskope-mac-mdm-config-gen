@@ -1,6 +1,6 @@
 # Netskope Intune MDM Script Generator
 
-This project is a web application that generates custom configuration scripts for Netskope Intune MDM deployment. It consists of a React frontend and a Node.js backend, which work together to create a zip file containing customized installation scripts and configuration files.
+This project is a web application that generates custom configuration scripts for Netskope MDM deployment and support deployment on JAMF, Workspace One and Intune. It consists of a React frontend and a Node.js backend, which work together to create a zip file containing customized installation scripts and configuration files. The easiest and recommended deployment option would be to just use the included docker-compose.yml file.
 
 ## Features
 
