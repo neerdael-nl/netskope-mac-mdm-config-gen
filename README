@@ -1,6 +1,6 @@
-# Netskope MDM Script Generator (JAMF, Workspace ONE, Microsoft Intune) 
+# Netskope MDM Script Generator (JAMF, Workspace ONE, Microsoft Intune, Kandji) 
 
-This project is a web application that generates custom configuration scripts for Netskope MDM deployment and support deployment on JAMF, Workspace One and Intune. It consists of a React frontend and a Node.js backend, which work together to create a zip file containing customized installation scripts and configuration files. The easiest and recommended deployment option would be to just use the included docker-compose.yml file.
+This project is a web application that generates custom configuration scripts for Netskope MDM deployment on JAMF, VMWare Workspace One, Kandji and Microsoft Intune. It consists of a React frontend and a Node.js backend, which work together to create a zip file containing customized installation scripts and configuration files. The easiest and recommended deployment option would be to just use the included docker-compose.yml file.
 
 ## Features
 
@@ -11,9 +11,7 @@ This project is a web application that generates custom configuration scripts fo
 
 ## To-do
 
-- Add support for Khandji
 - Validate support for Workspace ONE and JAMF
-- Add dropdown selection menu for MDM platform of choice
 - Include installation instructions for MDM platform of choice in pre-packaged zip
 
 ## Prerequisites
@@ -108,11 +106,13 @@ This project is a web application that generates custom configuration scripts fo
 ## Usage
 
 1. Fill in the required fields in the web interface:
+   - MDM Vendor
    - Tenant Name
    - Top Level Domain
    - Organization Key
    - Enrollment Auth Token (optional)
    - Enrollment Encryption Token (optional)
+   - Email (optional, for testing only!)
 
 2. Click the "Generate Configuration" button.
 
