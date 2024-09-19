@@ -2,9 +2,8 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import './App.css';
 
-const topLevelDomains = ['au.goskope.com', 'ca.goskope.com', 'de.goskope.com', 'eu.goskope.com', 'eur.goskope.com', 'fr.goskope.com', 'goskope.com', 'in.goskope.com', 'jp.goskope.com', 'na-eur.goskope.com', 'na.goskope.com', 'uk.goskope.com', 'us.goskope.com'];
-
 function App() {
+  const topLevelDomains = ['au.goskope.com', 'ca.goskope.com', 'de.goskope.com', 'eu.goskope.com', 'eur.goskope.com', 'fr.goskope.com', 'goskope.com', 'in.goskope.com', 'jp.goskope.com', 'na-eur.goskope.com', 'na.goskope.com', 'uk.goskope.com', 'us.goskope.com'];
   const [formData, setFormData] = useState({
     tenantName: '',
     topLevelDomain: 'goskope.com',
@@ -145,5 +144,6 @@ function App() {
       </div>
     </div>
   );
+}
 
 export default App;

@@ -30,7 +30,7 @@ app.post('/api/generate-zip', (req, res) => {
   archive.append(plistString, { name: 'com.netskope.client.Netskope-Client.plist' });
 
   // Generate and add custom pre-install script
-  const preInstallScript = generateCustomPreInstallScript(tenantName, topLevelDomain, organizationKey, enrollmentAuthToken, enrollmentEncryptionToken);
+  const preInstallScript = generateCustomPreInstallScript(tenantName, topLevelDomain, organizationKey, enrollmentAuthToken, enrollmentEncryptionToken, email);
   archive.append(preInstallScript, { name: 'intune-pre-install.sh' });
 
   // Add post-install script to zip
@@ -40,7 +40,7 @@ app.post('/api/generate-zip', (req, res) => {
   archive.finalize();
 });
 
-function generateCustomPreInstallScript(tenantName, topLevelDomain, organizationKey, enrollmentAuthToken, enrollmentEncryptionToken) {
+function generateCustomPreInstallScript(tenantName, topLevelDomain, organizationKey, enrollmentAuthToken, enrollmentEncryptionToken, email) {
   let script = fs.readFileSync(path.join(__dirname, 'scripts', 'intune-pre-install.sh'), 'utf8');
   
   // Replace placeholders with actual values
@@ -48,6 +48,7 @@ function generateCustomPreInstallScript(tenantName, topLevelDomain, organization
   script = script.replace('{{ORGANIZATION_KEY}}', organizationKey);
   script = script.replace('{{ENROLLMENT_AUTH_TOKEN}}', enrollmentAuthToken || '');
   script = script.replace('{{ENROLLMENT_ENCRYPTION_TOKEN}}', enrollmentEncryptionToken || '');
+  script = script.replace('{{EMAIL}}', email || '{{email}}');
   
   return script;
 }
