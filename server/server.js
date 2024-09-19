@@ -11,7 +11,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, '../client/build')));
 
 app.post('/api/generate-zip', (req, res) => {
-  const { tenantName, topLevelDomain, organizationKey, enrollmentAuthToken, enrollmentEncryptionToken, email } = req.body;
+  const { mdmPlatform, tenantName, topLevelDomain, organizationKey, enrollmentAuthToken, enrollmentEncryptionToken, email } = req.body;
 
   // Generate plist content
   const plistContent = {
@@ -30,7 +30,7 @@ app.post('/api/generate-zip', (req, res) => {
   archive.append(plistString, { name: 'com.netskope.client.Netskope-Client.plist' });
 
   // Generate and add custom pre-install script
-  const preInstallScript = generateCustomPreInstallScript(tenantName, topLevelDomain, organizationKey, enrollmentAuthToken, enrollmentEncryptionToken, email);
+  const preInstallScript = generateCustomPreInstallScript(mdmPlatform, tenantName, topLevelDomain, organizationKey, enrollmentAuthToken, enrollmentEncryptionToken, email);
   archive.append(preInstallScript, { name: 'pre-install.sh' });
 
   // Add post-install script to zip
@@ -40,7 +40,7 @@ app.post('/api/generate-zip', (req, res) => {
   archive.finalize();
 });
 
-function generateCustomPreInstallScript(tenantName, topLevelDomain, organizationKey, enrollmentAuthToken, enrollmentEncryptionToken, email) {
+function generateCustomPreInstallScript(mdmPlatform, tenantName, topLevelDomain, organizationKey, enrollmentAuthToken, enrollmentEncryptionToken, email) {
   let script = fs.readFileSync(path.join(__dirname, 'scripts', 'pre-install.sh'), 'utf8');
   
   // Replace placeholders with actual values
