@@ -5,7 +5,10 @@
   "dependencies": {
     "archiver": "^5.3.1",
     "express": "^4.17.1",
-    "plist": "^3.0.5"
+    "plist": "^3.0.5",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^4.6.3",
+    "uuid": "^9.0.0"
   },
   "scripts": {
     "start": "node server.js"
