@@ -6,6 +6,7 @@ const fs = require('fs');
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 const { v4: uuidv4 } = require('uuid');
+const fs = require('fs').promises;
 
 const app = express();
 app.use(express.json());
@@ -77,6 +78,15 @@ app.post('/api/generate', (req, res) => {
   const output = fs.createWriteStream(path.join(__dirname, 'temp', `${uuidv4()}.zip`));
   
   archive.pipe(output);
+
+  const mobileConfigPath = path.join(__dirname, 'scripts', 'NetskopeClient.mobileconfig');
+  try {
+    const mobileConfigContent = await fs.readFile(mobileConfigPath, 'utf8');
+    archive.append(mobileConfigContent, { name: 'NetskopeClient.mobileconfig' });
+  } catch (error) {
+    console.error('Error reading NetskopeClient.mobileconfig:', error);
+    return res.status(500).json({ error: 'Error generating configuration files' });
+  }
 
   // Add files to the archive (reuse existing logic)
   // ...

@@ -49,15 +49,9 @@ function App() {
       return;
     }
     try {
-      const response = await axios.post('/api/generate-zip', formData, {
-        responseType: 'blob'
-      });
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', 'netskope_config.zip');
-      document.body.appendChild(link);
-      link.click();
+      const response = await axios.post('/api/generate', formData);
+      const { downloadLink } = response.data;
+      window.location.href = downloadLink;
     } catch (error) {
       console.error('Error generating zip file:', error);
       alert('Error generating zip file. Please try again.');
