@@ -3,13 +3,6 @@ import axios from 'axios';
 import './App.css';
 
 function App() {
-  const [logs, setLogs] = useState([]);
-  const debug = (message) => {
-    const logMessage = `${new Date().toISOString()} - ${message}`;
-    console.log(logMessage);
-    setLogs(prevLogs => [...prevLogs, logMessage]);
-  };
-
   const topLevelDomains = ['au.goskope.com', 'ca.goskope.com', 'de.goskope.com', 'eu.goskope.com', 'eur.goskope.com', 'fr.goskope.com', 'goskope.com', 'in.goskope.com', 'jp.goskope.com', 'na-eur.goskope.com', 'na.goskope.com', 'uk.goskope.com', 'us.goskope.com'];
   const mdmPlatforms = ['Microsoft Intune', 'Workspace ONE', 'JAMF', 'Khandji'];
   const [formData, setFormData] = useState({
@@ -51,17 +44,12 @@ function App() {
   };
 
   const handleSubmit = async (e) => {
-    debug('Form submission started');
     e.preventDefault();
     if (!validateForm()) {
-      debug('Form validation failed');
       return;
     }
-    debug(`Submitting form data: ${JSON.stringify(formData)}`);
     try {
-      debug('Sending request to server...');
       const response = await axios.post('/api/generate', formData, { responseType: 'blob' });
-      debug('Received response from server');
       
       const blob = new Blob([response.data], { type: 'application/zip' });
       const url = window.URL.createObjectURL(blob);
@@ -72,18 +60,7 @@ function App() {
       link.click();
       link.parentNode.removeChild(link);
       window.URL.revokeObjectURL(url);
-      
-      debug('File download initiated');
     } catch (error) {
-      debug(`Error details: ${error}`);
-      if (error.response) {
-        debug(`Response status: ${error.response.status}`);
-        debug(`Response data: ${JSON.stringify(error.response.data)}`);
-      } else if (error.request) {
-        debug('No response received');
-      } else {
-        debug(`Error message: ${error.message}`);
-      }
       alert(`Error generating zip file: ${error.message}`);
     }
   };
@@ -95,21 +72,25 @@ function App() {
       <div className="container">
         <h1>Netskope MDM Script Generator</h1>
         <h3>JAMF, VMWare Workspace ONE, Kandji and Microsoft Intune (Validation Needed)</h3>
+        <p className="disclaimer">
+          Disclaimer: Only Microsoft Intune has currently been validated both without secure enrollment and with an auth token and an auth + encryption token. 
+          Please contact <a href="mailto:jneerdael@netskope.com">jneerdael@netskope.com</a> if you would like to test any of the other MDMs.
+        </p>
         <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="mdmPlatform">MDM Platform *</label>
-          <select
-            id="mdmPlatform"
-            name="mdmPlatform"
-            value={formData.mdmPlatform}
-            onChange={handleChange}
-            required
-          >
-            {mdmPlatforms.map(platform => (
-              <option key={platform} value={platform}>{platform}</option>
-            ))}
-          </select>
-        </div>
+          <div className="form-group">
+            <label htmlFor="mdmPlatform">MDM Platform *</label>
+            <select
+              id="mdmPlatform"
+              name="mdmPlatform"
+              value={formData.mdmPlatform}
+              onChange={handleChange}
+              required
+            >
+              {mdmPlatforms.map(platform => (
+                <option key={platform} value={platform}>{platform}</option>
+              ))}
+            </select>
+          </div>
           <div className="form-group">
             <label htmlFor="tenantName">Tenant Name *</label>
             <input
@@ -179,12 +160,6 @@ function App() {
               placeholder="Enter email for development and testing purposes only"
             />
             {errors.email && <div className="error">{errors.email}</div>}
-          </div>
-          <div className="debug-logs">
-            <h3>Debug Logs</h3>
-            <pre>
-              {logs.join('\n')}
-            </pre>
           </div>
           <button type="submit" disabled={!isFormValid}>Generate Configuration</button>
         </form>

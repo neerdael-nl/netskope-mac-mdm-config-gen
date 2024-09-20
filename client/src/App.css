@@ -94,3 +94,22 @@ body {
   button:hover {
     background-color: #4fa8d5;
   }
+
+  .disclaimer {
+    font-size: 0.9em;
+    color: #666;
+    margin-bottom: 20px;
+    text-align: center;
+    padding: 10px;
+    background-color: #f8f8f8;
+    border-radius: 5px;
+  }
+  
+  .disclaimer a {
+    color: #61dafb;
+    text-decoration: none;
+  }
+  
+  .disclaimer a:hover {
+    text-decoration: underline;
+  }
