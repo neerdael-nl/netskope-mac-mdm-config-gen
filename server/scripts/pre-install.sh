@@ -15,13 +15,27 @@ fi
 
 # Check if /Library/Application Support/Netskope exists and delete it if it does
 netskopeFolder="/Library/Application Support/Netskope"
+nsbrandingFolder="/tmp/nsbranding"
+
+# Check and delete Netskope folder if it exists
 if [ -d "$netskopeFolder" ]; then
     log "Found existing Netskope folder. Deleting..."
     rm -rf "$netskopeFolder"
     log "Netskope folder deleted."
 else
-    log "No existing Netskope folder found. Continuing..."
+    log "No existing Netskope folder found."
 fi
+
+# Check and delete nsbranding folder if it exists
+if [ -d "$nsbrandingFolder" ]; then
+    log "Found existing nsbranding folder. Deleting..."
+    rm -rf "$nsbrandingFolder"
+    log "nsbranding folder deleted."
+else
+    log "No existing nsbranding folder found."
+fi
+
+log "Folder check and cleanup completed."
 
 # Create the nsbranding directory if it doesn't exist
 mkdir -p /tmp/nsbranding
