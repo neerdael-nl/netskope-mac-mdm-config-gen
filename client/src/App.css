@@ -25,6 +25,29 @@ body {
     font-size: 0.8em;
     margin-top: 5px;
   }
+
+  .debug-logs {
+    margin-top: 20px;
+    border: 1px solid #61dafb;
+    padding: 10px;
+    max-height: 300px;
+    overflow-y: auto;
+    background-color: #1e1e1e;
+    font-family: monospace;
+    font-size: 0.9em;
+    line-height: 1.4;
+  }
+  
+  .debug-logs h3 {
+    margin-top: 0;
+    color: #61dafb;
+  }
+  
+  .debug-logs pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    margin: 0;
+  }
   
   h1 {
     text-align: center;

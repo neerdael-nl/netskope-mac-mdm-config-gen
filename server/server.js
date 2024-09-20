@@ -2,13 +2,16 @@ const express = require('express');
 const path = require('path');
 const plist = require('plist');
 const archiver = require('archiver');
-const fs = require('fs').promises;
+const fs = require('fs');
+const fsPromises = fs.promises;
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 const { v4: uuidv4 } = require('uuid');
+const cors = require('cors');
 
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, '../client/build')));
@@ -69,39 +72,99 @@ const generatedFiles = new Map();
  *                 downloadLink:
  *                   type: string
  */
-app.post('/api/generate', (req, res) => {
+app.post('/api/generate', async (req, res) => {
+  console.log('Received generate request:', req.body);
   const { mdmPlatform, tenantName, topLevelDomain, organizationKey, enrollmentAuthToken, enrollmentEncryptionToken, email } = req.body;
 
-  // Generate files (reuse existing logic)
-  const archive = archiver('zip', { zlib: { level: 9 } });
-  const output = fs.createWriteStream(path.join(__dirname, 'temp', `${uuidv4()}.zip`));
-  
-  archive.pipe(output);
-
-  const mobileConfigPath = path.join(__dirname, 'scripts', 'NetskopeClient.mobileconfig');
   try {
-    const mobileConfigContent = await fs.readFile(mobileConfigPath, 'utf8');
-    archive.append(mobileConfigContent, { name: 'NetskopeClient.mobileconfig' });
-  } catch (error) {
-    console.error('Error reading NetskopeClient.mobileconfig:', error);
-    return res.status(500).json({ error: 'Error generating configuration files' });
-  }
+    const archive = archiver('zip', { zlib: { level: 9 } });
+    const output = fs.createWriteStream(path.join(__dirname, 'temp', `${uuidv4()}.zip`));
+    
+    archive.pipe(output);
 
-  // Add files to the archive (reuse existing logic)
-  // ...
+    // Generate and add files to the archive
+    const mobileConfigPath = path.join(__dirname, 'scripts', 'NetskopeClient.mobileconfig');
+    const mobileConfigContent = await fsPromises.readFile(mobileConfigPath, 'utf8');
+    
+    // Modify the mobileconfig content with user-provided data
+    const modifiedMobileConfig = mobileConfigContent
+      .replace(/{{tenantName}}/g, tenantName)
+      .replace(/{{topLevelDomain}}/g, topLevelDomain)
+      .replace(/{{organizationKey}}/g, organizationKey);
 
-  archive.finalize();
+    archive.append(modifiedMobileConfig, { name: 'NetskopeClient.mobileconfig' });
 
-  output.on('close', () => {
-    const fileId = uuidv4();
-    generatedFiles.set(fileId, {
-      path: output.path,
-      expiresAt: Date.now() + 5 * 60 * 1000 // 5 minutes from now
+    // Generate custom plist file
+    const customPlist = plist.build({
+      TenantHostName: `${tenantName}.${topLevelDomain}`,
+      Email: email || '',
+      OrgKey: organizationKey,
+      addonhost: `${tenantName}.${topLevelDomain}`
+    });
+    archive.append(customPlist, { name: 'com.netskope.client.Netskope-Client.plist' });
+
+    // Modify and add pre-install and post-install scripts
+    const preInstallPath = path.join(__dirname, 'scripts', 'pre-install.sh');
+    const postInstallPath = path.join(__dirname, 'scripts', 'post-install.sh');
+
+    let preInstallContent = await fsPromises.readFile(preInstallPath, 'utf8');
+    let postInstallContent = await fsPromises.readFile(postInstallPath, 'utf8');
+
+    // Replace placeholders in scripts
+    const replacements = {
+      '{{TENANT_HOST_NAME}}': `${tenantName}.${topLevelDomain}`,
+      '{{EMAIL}}': email || '',
+      '{{ORGANIZATION_KEY}}': organizationKey,
+      '{{ENROLLMENT_AUTH_TOKEN}}': enrollmentAuthToken || '',
+      '{{ENROLLMENT_ENCRYPTION_TOKEN}}': enrollmentEncryptionToken || ''
+    };
+
+    for (const [placeholder, value] of Object.entries(replacements)) {
+      preInstallContent = preInstallContent.replace(new RegExp(placeholder, 'g'), value);
+      postInstallContent = postInstallContent.replace(new RegExp(placeholder, 'g'), value);
+    }
+
+    // Add MDM-specific modifications
+    if (mdmPlatform === 'JAMF') {
+      // Add JAMF-specific modifications here
+    } else if (mdmPlatform === 'Workspace ONE') {
+      // Add Workspace ONE-specific modifications here
+    } else if (mdmPlatform === 'Microsoft Intune') {
+      // Add Microsoft Intune-specific modifications here
+    } else if (mdmPlatform === 'Kandji') {
+      // Add Kandji-specific modifications here
+    }
+
+    archive.append(preInstallContent, { name: 'pre-install.sh' });
+    archive.append(postInstallContent, { name: 'post-install.sh' });
+
+    archive.finalize();
+
+    output.on('close', () => {
+      console.log('Archive created successfully');
+      const filePath = output.path;
+      res.download(filePath, 'netskope_config.zip', (err) => {
+        if (err) {
+          console.error('Download error:', err);
+          res.status(500).send('Error downloading file');
+        }
+        // Delete the file after sending
+        fs.unlink(filePath, (unlinkErr) => {
+          if (unlinkErr) {
+            console.error('Error deleting file:', unlinkErr);
+          }
+        });
+      });
     });
 
-    const downloadLink = `/api/download/${fileId}`;
-    res.json({ downloadLink });
-  });
+    archive.on('error', (err) => {
+      console.error('Error creating archive:', err);
+      res.status(500).json({ error: 'Error creating archive' });
+    });
+  } catch (error) {
+    console.error('Unexpected error:', error);
+    res.status(500).json({ error: 'Unexpected error occurred' });
+  }
 });
 
 /**
@@ -126,7 +189,7 @@ app.post('/api/generate', (req, res) => {
  *       404:
  *         description: File not found or expired
  */
-app.get('/api/download/:fileId', (req, res) => {
+app.get('/api/download/:fileId', async (req, res) => {
   const fileId = req.params.fileId;
   const fileInfo = generatedFiles.get(fileId);
 
@@ -135,14 +198,15 @@ app.get('/api/download/:fileId', (req, res) => {
     return res.status(404).send('File not found or expired');
   }
 
-  res.download(fileInfo.path, 'netskope_config.zip', (err) => {
+  res.download(fileInfo.path, 'netskope_config.zip', async (err) => {
     if (err) {
       console.error('Download error:', err);
     } else {
-      // Clean up the file after successful download
-      fs.unlink(fileInfo.path, (unlinkErr) => {
-        if (unlinkErr) console.error('File deletion error:', unlinkErr);
-      });
+      try {
+        await fs.unlink(fileInfo.path);
+      } catch (unlinkErr) {
+        console.error('File deletion error:', unlinkErr);
+      }
       generatedFiles.delete(fileId);
     }
   });
@@ -154,4 +218,10 @@ const port = process.env.PORT || 3001;
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
   console.log(`Swagger documentation available at http://localhost:${port}/api-docs`);
+});
+
+// The "catchall" handler: for any request that doesn't
+// match one above, send back React's index.html file.
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/build/index.html'));
 });

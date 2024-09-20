@@ -3,6 +3,13 @@ import axios from 'axios';
 import './App.css';
 
 function App() {
+  const [logs, setLogs] = useState([]);
+  const debug = (message) => {
+    const logMessage = `${new Date().toISOString()} - ${message}`;
+    console.log(logMessage);
+    setLogs(prevLogs => [...prevLogs, logMessage]);
+  };
+
   const topLevelDomains = ['au.goskope.com', 'ca.goskope.com', 'de.goskope.com', 'eu.goskope.com', 'eur.goskope.com', 'fr.goskope.com', 'goskope.com', 'in.goskope.com', 'jp.goskope.com', 'na-eur.goskope.com', 'na.goskope.com', 'uk.goskope.com', 'us.goskope.com'];
   const mdmPlatforms = ['Microsoft Intune', 'Workspace ONE', 'JAMF', 'Khandji'];
   const [formData, setFormData] = useState({
@@ -39,22 +46,45 @@ function App() {
   };
 
   const isValidEmail = (email) => {
-    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(String(email).toLowerCase());
   };
 
   const handleSubmit = async (e) => {
+    debug('Form submission started');
     e.preventDefault();
     if (!validateForm()) {
+      debug('Form validation failed');
       return;
     }
+    debug(`Submitting form data: ${JSON.stringify(formData)}`);
     try {
-      const response = await axios.post('/api/generate', formData);
-      const { downloadLink } = response.data;
-      window.location.href = downloadLink;
+      debug('Sending request to server...');
+      const response = await axios.post('/api/generate', formData, { responseType: 'blob' });
+      debug('Received response from server');
+      
+      const blob = new Blob([response.data], { type: 'application/zip' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'netskope_config.zip');
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      debug('File download initiated');
     } catch (error) {
-      console.error('Error generating zip file:', error);
-      alert('Error generating zip file. Please try again.');
+      debug(`Error details: ${error}`);
+      if (error.response) {
+        debug(`Response status: ${error.response.status}`);
+        debug(`Response data: ${JSON.stringify(error.response.data)}`);
+      } else if (error.request) {
+        debug('No response received');
+      } else {
+        debug(`Error message: ${error.message}`);
+      }
+      alert(`Error generating zip file: ${error.message}`);
     }
   };
 
@@ -149,6 +179,12 @@ function App() {
               placeholder="Enter email for development and testing purposes only"
             />
             {errors.email && <div className="error">{errors.email}</div>}
+          </div>
+          <div className="debug-logs">
+            <h3>Debug Logs</h3>
+            <pre>
+              {logs.join('\n')}
+            </pre>
           </div>
           <button type="submit" disabled={!isFormValid}>Generate Configuration</button>
         </form>
