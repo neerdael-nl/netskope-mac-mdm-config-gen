@@ -40,7 +40,11 @@ For local development or building your own Docker image, refer to the "Installat
 
 ### Web Interface
 
-1. Open your browser and go to `http://localhost:3001`.
+#### Self-hosted Version
+
+A self-hosted version of this application is available at https://mdm.thepi.es (on a best effort basis).
+
+1. Open your browser and go to `https://mdm.thepi.es`.
 2. Fill in the required fields:
    - MDM Platform
    - Tenant Name
@@ -52,31 +56,50 @@ For local development or building your own Docker image, refer to the "Installat
 3. Click the "Generate Configuration" button.
 4. Download the generated zip file containing the custom configuration scripts and files.
 
+#### Local Version
+
+Follow the same steps as above, but use `http://localhost:3001` instead of `https://mdm.thepi.es`.
+
 ### API
 
-The application provides an API endpoint for programmatic access. Swagger documentation is available at `http://localhost:3001/api-docs`.
+The application provides an API endpoint for programmatic access. 
 
-To generate configuration files using the API:
+#### Self-hosted Version
 
-1. Send a POST request to `/api/generate` with the required parameters.
+Swagger documentation for the self-hosted version is available at `https://mdm.thepi.es/api-docs`.
+
+To generate configuration files using the self-hosted API:
+
+1. Send a POST request to `https://mdm.thepi.es/api/generate` with the required parameters.
 2. Receive a download link in the response.
 3. Use the download link to retrieve the generated zip file (valid for 5 minutes).
 
-Example using curl:
+Example using curl for the self-hosted version:
 
-#### Generate files
+##### Generate files
 
    ```
-   curl -X POST http://localhost:3001/api/generate \
+   curl -X POST https://mdm.thepi.es/api/generate \
    -H "Content-Type: application/json" \
-   -d '{"mdmPlatform":"Microsoft Intune","tenantName":"example","topLevelDomain":"goskope.com","organizationKey":"abc123"}'
+   -d '{
+     "mdmPlatform": "Microsoft Intune",
+     "tenantName": "example",
+     "topLevelDomain": "goskope.com",
+     "organizationKey": "abc123",
+     "enrollmentAuthToken": "authToken123",
+     "enrollmentEncryptionToken": "encryptionToken456"
+   }'
    ```
 
-#### Download the file using the link from the previous response
+##### Download the file using the link from the previous response
 
    ```
-   curl -O -J http://localhost:3001/api/download/{fileId}
+   curl -O -J https://mdm.thepi.es/api/download/{fileId}
    ```
+
+#### Local Version
+
+For the local version, replace `https://mdm.thepi.es` with `http://localhost:3001` in the above examples.
 
 ## Installation and Running Options
 
