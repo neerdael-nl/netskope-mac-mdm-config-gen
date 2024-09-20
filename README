@@ -1,6 +1,6 @@
-# Netskope MDM Script Generator (JAMF, Workspace ONE, Microsoft Intune, Kandji) 
+# Netskope MDM Script Generator (JAMF, Workspace ONE, Microsoft Intune, Kandji)
 
-This project is a web application that generates custom configuration scripts for Netskope MDM deployment on JAMF, VMWare Workspace One, Kandji and Microsoft Intune. It consists of a React frontend and a Node.js backend, which work together to create a zip file containing customized installation scripts and configuration files. The easiest and recommended deployment option would be to just use the included docker-compose.yml file.
+This project is a web application that generates custom configuration scripts for Netskope MDM deployment on JAMF, VMWare Workspace One, Kandji, and Microsoft Intune. It consists of a React frontend and a Node.js backend, which work together to create a zip file containing customized installation scripts and configuration files.
 
 ## Features
 
@@ -8,17 +8,75 @@ This project is a web application that generates custom configuration scripts fo
 - Create pre-install and post-install scripts with user-provided parameters
 - Package all necessary files into a downloadable zip archive
 - Support for optional enrollment tokens for secure enrollment
-
-## To-do
-
-- Validate support for Workspace ONE and JAMF
-- Include installation instructions for MDM platform of choice in pre-packaged zip
+- API endpoint with Swagger documentation for programmatic access
 
 ## Prerequisites
 
-- Node.js (v14 or later)
-- npm (v6 or later)
-- Docker (optional, for containerized deployment)
+- Docker and Docker Compose (recommended)
+- Node.js (v14 or later) and npm (v6 or later) for local development
+
+## Installation and Running
+
+### Preferred Method: Docker Compose
+
+1. Clone the repository:
+   ```
+   git clone https://github.com/neerdael-nl/netskope-mac-mdm-config-gen.git
+   cd netskope-mac-mdm-config-gen
+   ```
+
+2. Run the application using Docker Compose:
+   ```
+   docker-compose up -d
+   ```
+
+3. Open your browser and navigate to `http://localhost:3001`.
+
+### Alternative Methods
+
+For local development or building your own Docker image, refer to the "Installation and Running Options" section below.
+
+## Usage
+
+### Web Interface
+
+1. Open your browser and go to `http://localhost:3001`.
+2. Fill in the required fields:
+   - MDM Platform
+   - Tenant Name
+   - Top Level Domain
+   - Organization Key
+   - Enrollment Auth Token (optional)
+   - Enrollment Encryption Token (optional)
+   - Email (optional, for testing only!)
+3. Click the "Generate Configuration" button.
+4. Download the generated zip file containing the custom configuration scripts and files.
+
+### API
+
+The application provides an API endpoint for programmatic access. Swagger documentation is available at `http://localhost:3001/api-docs`.
+
+To generate configuration files using the API:
+
+1. Send a POST request to `/api/generate` with the required parameters.
+2. Receive a download link in the response.
+3. Use the download link to retrieve the generated zip file (valid for 5 minutes).
+
+Example using curl:
+
+#### Generate files
+
+   ```
+   curl -X POST http://localhost:3001/api/generate \
+   -H "Content-Type: application/json" \
+   -d '{"mdmPlatform":"Microsoft Intune","tenantName":"example","topLevelDomain":"goskope.com","organizationKey":"abc123"}'
+   ```
+
+#### Download the file using the link from the previous response
+
+   ```
+   curl -O -J http://localhost:3001/api/download/{fileId}
+   ```
 
 ## Installation and Running Options
 
@@ -60,8 +118,6 @@ This project is a web application that generates custom configuration scripts fo
    npm run start:prod
    ```
 
-4. Open your browser and navigate to `http://localhost:3001`.
-
 ### 3. Docker (Building Your Own Image)
 
 1. Clone the repository (if you haven't already).
@@ -92,34 +148,6 @@ This project is a web application that generates custom configuration scripts fo
 
 3. Open your browser and navigate to `http://localhost:3001`.
 
-### 5. Docker Compose
-
-1. Clone the repository (if you haven't already).
-
-2. Run the application using Docker Compose:
-   ```
-   docker-compose up -d
-   ```
-
-3. Open your browser and navigate to `http://localhost:3001`.
-
-## Usage
-
-1. Fill in the required fields in the web interface:
-   - MDM Vendor
-   - Tenant Name
-   - Top Level Domain
-   - Organization Key
-   - Enrollment Auth Token (optional)
-   - Enrollment Encryption Token (optional)
-   - Email (optional, for testing only!)
-
-2. Click the "Generate Configuration" button.
-
-3. Download the generated zip file containing the custom configuration scripts and files.
-
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
-
-
