@@ -2,11 +2,10 @@ const express = require('express');
 const path = require('path');
 const plist = require('plist');
 const archiver = require('archiver');
-const fs = require('fs');
+const fs = require('fs').promises;
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 const { v4: uuidv4 } = require('uuid');
-const fs = require('fs').promises;
 
 const app = express();
 app.use(express.json());
