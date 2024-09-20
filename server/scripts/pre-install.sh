@@ -45,7 +45,12 @@ jsonFilePath="/tmp/nsbranding/nsinstparams.json"
 
 # Write the JSON content to nsinstparams.json
 cat > "$jsonFilePath" <<EOF
-{"TenantHostName":"{{TENANT_HOST_NAME}}", "Email":"{{EMAIL}}", "OrgKey":"{{ORGANIZATION_KEY}}"}
+{
+  "TenantHostName":"{{TENANT_HOST_NAME}}",
+  "Email":"{{EMAIL}}",
+  "OrgKey":"{{ORGANIZATION_KEY}}",
+  "addonhost":"{{ADDON_HOST}}"
+}
 EOF
 
 log "Installation parameters written to $jsonFilePath"

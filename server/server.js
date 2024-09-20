@@ -26,11 +26,8 @@ const swaggerOptions = {
       description: 'API for generating Netskope MDM configuration files',
     },
   },
-  apis: ['./server.js'],
+  apis: ['./server/server.js'], // Make sure this path is correct
 };
-
-const swaggerSpec = swaggerJsdoc(swaggerOptions);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // In-memory storage for generated files (in production, use a proper database)
 const generatedFiles = new Map();
@@ -49,6 +46,7 @@ const generatedFiles = new Map();
  *             properties:
  *               mdmPlatform:
  *                 type: string
+ *                 enum: [JAMF, 'Workspace ONE', 'Microsoft Intune', Kandji]
  *               tenantName:
  *                 type: string
  *               topLevelDomain:
@@ -63,13 +61,20 @@ const generatedFiles = new Map();
  *                 type: string
  *     responses:
  *       200:
- *         description: Successful response with download link
+ *         description: Successful response with zip file
+ *         content:
+ *           application/zip:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *       500:
+ *         description: Internal server error
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 downloadLink:
+ *                 error:
  *                   type: string
  */
 app.post('/api/generate', async (req, res) => {
@@ -95,11 +100,16 @@ app.post('/api/generate', async (req, res) => {
     archive.append(modifiedMobileConfig, { name: 'NetskopeClient.mobileconfig' });
 
     // Generate custom plist file
+    let plistEmail = email || '';
+    if (mdmPlatform === 'Workspace ONE' && !email) {
+      plistEmail = '{EmailUserName}';
+    } else if (mdmPlatform === 'Kandji' && !email) {
+      plistEmail = '$EMAIL';
+    }
+
     const customPlist = plist.build({
       TenantHostName: `${tenantName}.${topLevelDomain}`,
-      Email: email || '',
-      OrgKey: organizationKey,
-      addonhost: `${tenantName}.${topLevelDomain}`
+      Email: plistEmail
     });
     archive.append(customPlist, { name: 'com.netskope.client.Netskope-Client.plist' });
 
@@ -113,10 +123,11 @@ app.post('/api/generate', async (req, res) => {
     // Replace placeholders in scripts
     const replacements = {
       '{{TENANT_HOST_NAME}}': `${tenantName}.${topLevelDomain}`,
-      '{{EMAIL}}': email || '',
+      '{{EMAIL}}': email || (mdmPlatform === 'Workspace ONE' ? '{EmailUserName}' : (mdmPlatform === 'Kandji' ? '$EMAIL' : '')),
       '{{ORGANIZATION_KEY}}': organizationKey,
       '{{ENROLLMENT_AUTH_TOKEN}}': enrollmentAuthToken || '',
-      '{{ENROLLMENT_ENCRYPTION_TOKEN}}': enrollmentEncryptionToken || ''
+      '{{ENROLLMENT_ENCRYPTION_TOKEN}}': enrollmentEncryptionToken || '',
+      '{{ADDON_HOST}}': `${tenantName}.${topLevelDomain}`
     };
 
     for (const [placeholder, value] of Object.entries(replacements)) {
@@ -212,7 +223,15 @@ app.get('/api/download/:fileId', async (req, res) => {
   });
 });
 
-// ... (rest of the existing code)
+// Add this at the end of the file, just before app.listen()
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+const port = process.env.PORT || 3001;
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+  console.log(`Swagger documentation available at http://localhost:${port}/api-docs`);
+});
 
 const port = process.env.PORT || 3001;
 app.listen(port, () => {
