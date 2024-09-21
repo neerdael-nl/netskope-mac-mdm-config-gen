@@ -4,7 +4,7 @@ import './App.css';
 
 function App() {
   const topLevelDomains = ['au.goskope.com', 'ca.goskope.com', 'de.goskope.com', 'eu.goskope.com', 'eur.goskope.com', 'fr.goskope.com', 'goskope.com', 'in.goskope.com', 'jp.goskope.com', 'na-eur.goskope.com', 'na.goskope.com', 'uk.goskope.com', 'us.goskope.com'];
-  const mdmPlatforms = ['Microsoft Intune', 'Workspace ONE', 'JAMF', 'Khandji'];
+  const mdmPlatforms = ['Microsoft Intune', 'Workspace ONE', 'JAMF', 'Kandji'];
   const [formData, setFormData] = useState({
     mdmPlatform: 'Microsoft Intune',
     tenantName: '',
@@ -29,7 +29,7 @@ function App() {
       newErrors.tenantName = 'Tenant Name is required';
     }
     if (!formData.organizationKey.trim()) {
-      newErrors.organizationKey = 'Organization Key is required';
+      newErrors.organizationKey = 'Organization ID is required';
     }
     if (formData.email && !isValidEmail(formData.email)) {
       newErrors.email = 'Please enter a valid email address';
@@ -119,13 +119,13 @@ function App() {
             </select>
           </div>
           <div className="form-group">
-            <label htmlFor="organizationKey">Organization Key *</label>
+            <label htmlFor="organizationKey">Organization ID *</label>
             <input
               id="organizationKey"
               name="organizationKey"
               value={formData.organizationKey}
               onChange={handleChange}
-              placeholder="Enter Organization Key"
+              placeholder="Enter Organization ID"
               required
             />
             {errors.organizationKey && <div className="error">{errors.organizationKey}</div>}
