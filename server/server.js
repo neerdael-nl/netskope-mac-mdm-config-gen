@@ -108,7 +108,6 @@ app.post('/api/generate', async (req, res) => {
     }
 
     const customPlist = plist.build({
-      TenantHostName: `${tenantName}.${topLevelDomain}`,
       Email: plistEmail
     });
     archive.append(customPlist, { name: 'com.netskope.client.Netskope-Client.plist' });
@@ -122,12 +121,12 @@ app.post('/api/generate', async (req, res) => {
 
     // Replace placeholders in scripts
     const replacements = {
-      '{{TENANT_HOST_NAME}}': `${tenantName}.${topLevelDomain}`,
+      '{{TENANT_HOST_NAME}}': `addon-${tenantName}.${topLevelDomain}`,
       '{{EMAIL}}': email || (mdmPlatform === 'Workspace ONE' ? '{EmailUserName}' : (mdmPlatform === 'Kandji' ? '$EMAIL' : '')),
       '{{ORGANIZATION_KEY}}': organizationKey,
       '{{ENROLLMENT_AUTH_TOKEN}}': enrollmentAuthToken || '',
       '{{ENROLLMENT_ENCRYPTION_TOKEN}}': enrollmentEncryptionToken || '',
-      '{{ADDON_HOST}}': `${tenantName}.${topLevelDomain}`
+      '{{ADDON_HOST}}': `addon-${tenantName}.${topLevelDomain}`
     };
 
     for (const [placeholder, value] of Object.entries(replacements)) {
@@ -226,12 +225,6 @@ app.get('/api/download/:fileId', async (req, res) => {
 // Add this at the end of the file, just before app.listen()
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-
-const port = process.env.PORT || 3001;
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-  console.log(`Swagger documentation available at http://localhost:${port}/api-docs`);
-});
 
 const port = process.env.PORT || 3001;
 app.listen(port, () => {
