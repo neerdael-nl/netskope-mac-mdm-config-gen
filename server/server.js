@@ -105,6 +105,8 @@ app.post('/api/generate', async (req, res) => {
       plistEmail = '{EmailUserName}';
     } else if (mdmPlatform === 'Kandji' && !email) {
       plistEmail = '$EMAIL';
+    } else if ((mdmPlatform === 'JAMF' || mdmPlatform === 'Microsoft Intune') && !email) {
+      plistEmail = '{{mail}}';
     }
 
     const customPlist = plist.build({
@@ -147,7 +149,7 @@ fi
     // Replace placeholders in scripts
     const replacements = {
       '{{TENANT_HOST_NAME}}': `addon-${tenantName}.${topLevelDomain}`,
-      '{{EMAIL}}': email || '', // Use the provided email or an empty string if not provided
+      '{{EMAIL}}': plistEmail, // Use the plistEmail value, which includes platform-specific placeholders
       '{{ORGANIZATION_KEY}}': organizationKey,
       '{{ENROLLMENT_AUTH_TOKEN}}': enrollmentAuthToken || '',
       '{{ENROLLMENT_ENCRYPTION_TOKEN}}': enrollmentEncryptionToken || '',
