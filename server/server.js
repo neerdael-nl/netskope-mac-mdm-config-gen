@@ -131,7 +131,7 @@ read_default() {
     local domain="$1"
     local key="$2"
     local value
-    value=$(defaults -currentHost read "/Library/Managed Preferences/${domain}" "${key}" 2>/dev/null) || value=""
+    value=$(defaults -currentHost read "/Library/Managed Preferences/\${domain}" "\${key}" 2>/dev/null) || value=""
     echo "$value"
 }
 
