@@ -119,10 +119,35 @@ app.post('/api/generate', async (req, res) => {
     let preInstallContent = await fsPromises.readFile(preInstallPath, 'utf8');
     let postInstallContent = await fsPromises.readFile(postInstallPath, 'utf8');
 
+    // Add the correct email fetching method to pre-install.sh
+    const emailFetchingCode = `
+# Managed domain where Netskope client settings are stored
+managedDomain="com.netskope.client.Netskope-Client"
+
+# Function to safely read defaults
+read_default() {
+    local domain="$1"
+    local key="$2"
+    local value
+    value=$(defaults -currentHost read "/Library/Managed Preferences/${domain}" "${key}" 2>/dev/null) || value=""
+    echo "$value"
+}
+
+# Use the function to read values
+email=$(read_default "$managedDomain" "email")
+
+# If email is empty, use a default value or handle it as needed
+if [ -z "$email" ]; then
+  email="{{EMAIL}}"
+fi
+`;
+
+    preInstallContent = emailFetchingCode + preInstallContent;
+
     // Replace placeholders in scripts
     const replacements = {
       '{{TENANT_HOST_NAME}}': `addon-${tenantName}.${topLevelDomain}`,
-      '{{EMAIL}}': email || (mdmPlatform === 'Workspace ONE' ? '{EmailUserName}' : (mdmPlatform === 'Kandji' ? '$EMAIL' : '')),
+      '{{EMAIL}}': email || '', // Use the provided email or an empty string if not provided
       '{{ORGANIZATION_KEY}}': organizationKey,
       '{{ENROLLMENT_AUTH_TOKEN}}': enrollmentAuthToken || '',
       '{{ENROLLMENT_ENCRYPTION_TOKEN}}': enrollmentEncryptionToken || '',
@@ -132,17 +157,6 @@ app.post('/api/generate', async (req, res) => {
     for (const [placeholder, value] of Object.entries(replacements)) {
       preInstallContent = preInstallContent.replace(new RegExp(placeholder, 'g'), value);
       postInstallContent = postInstallContent.replace(new RegExp(placeholder, 'g'), value);
-    }
-
-    // Add MDM-specific modifications
-    if (mdmPlatform === 'JAMF') {
-      // Add JAMF-specific modifications here
-    } else if (mdmPlatform === 'Workspace ONE') {
-      // Add Workspace ONE-specific modifications here
-    } else if (mdmPlatform === 'Microsoft Intune') {
-      // Add Microsoft Intune-specific modifications here
-    } else if (mdmPlatform === 'Kandji') {
-      // Add Kandji-specific modifications here
     }
 
     archive.append(preInstallContent, { name: 'pre-install.sh' });

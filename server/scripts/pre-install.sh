@@ -13,6 +13,28 @@ if [ "$(id -u)" != "0" ]; then
    exit 1
 fi
 
+# Managed domain where Netskope client settings are stored
+managedDomain="com.netskope.client.Netskope-Client"
+
+# Function to safely read defaults
+read_default() {
+    local domain="$1"
+    local key="$2"
+    local value
+    value=$(defaults -currentHost read "/Library/Managed Preferences/${domain}" "${key}" 2>/dev/null) || value=""
+    echo "$value"
+}
+
+# Use the function to read values
+email=$(read_default "$managedDomain" "email")
+
+# If email is empty, use the provided email or a default value
+if [ -z "$email" ]; then
+  email="{{EMAIL}}"
+fi
+
+log "Using email: $email"
+
 # Check if /Library/Application Support/Netskope exists and delete it if it does
 netskopeFolder="/Library/Application Support/Netskope"
 nsbrandingFolder="/tmp/nsbranding"
@@ -47,7 +69,7 @@ jsonFilePath="/tmp/nsbranding/nsinstparams.json"
 cat > "$jsonFilePath" <<EOF
 {
   "TenantHostName":"{{TENANT_HOST_NAME}}",
-  "Email":"{{EMAIL}}",
+  "Email":"$email",
   "OrgKey":"{{ORGANIZATION_KEY}}",
   "addonhost":"{{ADDON_HOST}}"
 }
