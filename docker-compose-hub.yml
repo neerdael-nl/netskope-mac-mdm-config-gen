@@ -1,0 +1,8 @@
+services:
+  app:
+    image: johnneerdael/netskope-mdm-generator:latest
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+    command: node server/server.js

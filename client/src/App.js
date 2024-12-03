@@ -73,10 +73,7 @@ function App() {
       <div className="container">
         <h1>Netskope MDM Script Generator</h1>
         <h3>JAMF, VMWare Workspace ONE, Kandji and Microsoft Intune (Validation Needed)</h3>
-        <p className="disclaimer">
-          Disclaimer: Only Microsoft Intune has currently been validated both without secure enrollment and with an auth token and an auth + encryption token. 
-          Please contact <a href="mailto:jneerdael@netskope.com">jneerdael@netskope.com</a> if you would like to test any of the other MDMs.
-        </p>
+        
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="mdmPlatform">MDM Platform *</label>
@@ -163,7 +160,6 @@ function App() {
             {errors.email && <div className="error">{errors.email}</div>}
           </div>
           <div className="form-group multi-user-section">
-            <h3>Configuration Mode</h3>
             <div className="radio-group">
               <label className={`radio-label ${!formData.isMultiUser ? 'selected' : ''}`}>
                 <input
@@ -202,6 +198,11 @@ function App() {
           </div>
           <button type="submit" disabled={!isFormValid}>Generate Configuration</button>
         </form>
+
+        <p className="disclaimer">
+          Disclaimer: Only Microsoft Intune has currently been validated both without secure enrollment and with an auth token and an auth + encryption token. 
+          Please contact <a href="mailto:jneerdael@netskope.com">jneerdael@netskope.com</a> if you would like to test any of the other MDMs.
+        </p>
       </div>
     </div>
   );
