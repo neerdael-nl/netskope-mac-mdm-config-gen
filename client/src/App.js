@@ -159,42 +159,23 @@ function App() {
             />
             {errors.email && <div className="error">{errors.email}</div>}
           </div>
-          <div className="form-group multi-user-section">
-            <div className="radio-group">
-              <label className={`radio-label ${!formData.isMultiUser ? 'selected' : ''}`}>
-                <input
-                  type="radio"
-                  name="configType"
-                  checked={!formData.isMultiUser}
-                  onChange={() => handleChange({
-                    target: {
-                      name: 'isMultiUser',
-                      value: false
-                    }
-                  })}
-                />
-                <div>
-                  <span>Single-User Mode</span>
-                </div>
-              </label>
-              
-              <label className={`radio-label ${formData.isMultiUser ? 'selected' : ''}`}>
-                <input
-                  type="radio"
-                  name="configType"
-                  checked={formData.isMultiUser}
-                  onChange={() => handleChange({
-                    target: {
-                      name: 'isMultiUser',
-                      value: true
-                    }
-                  })}
-                />
-                <div>
-                  <span>Multi-User Mode</span>
-                </div>
-              </label>
-            </div>
+          <div className="form-group">
+            <label htmlFor="configMode">Configuration Mode *</label>
+            <select
+              id="configMode"
+              name="isMultiUser"
+              value={formData.isMultiUser}
+              onChange={(e) => handleChange({
+                target: {
+                  name: 'isMultiUser',
+                  value: e.target.value === 'true'
+                }
+              })}
+              required
+            >
+              <option value="false">Single-User Mode</option>
+              <option value="true">Multi-User Mode</option>
+            </select>
           </div>
           <button type="submit" disabled={!isFormValid}>Generate Configuration</button>
         </form>
