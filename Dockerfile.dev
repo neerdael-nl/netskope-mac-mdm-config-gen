@@ -2,24 +2,31 @@ FROM node:18
 
 WORKDIR /usr/src/app
 
-# Copy package.json files
-COPY package*.json ./
-COPY client/package*.json ./client/
-COPY server/package*.json ./server/
+# Create a non-root user and set ownership
+RUN mkdir -p /usr/src/app/client /usr/src/app/server && \
+    mkdir -p /home/node/.npm && \
+    chown -R node:node /usr/src/app /home/node/.npm
 
-# Install dependencies
-RUN npm install && \
-    cd client && npm install && \
-    cd ../server && npm install
-
-# Copy the rest of the application code
-COPY . .
-
-# Set permissions
-RUN chown -R node:node /usr/src/app
-
+# Switch to non-root user
 USER node
 
+# Copy package.json files
+COPY --chown=node:node package*.json ./
+COPY --chown=node:node client/package*.json ./client/
+COPY --chown=node:node server/package*.json ./server/
+
+# Install dependencies with verbose logging
+RUN set -x && \
+    npm ci --verbose || (cat /home/node/.npm/_logs/*-debug-0.log && exit 1) && \
+    cd client && npm ci --verbose || (cat /home/node/.npm/_logs/*-debug-0.log && exit 1) && \
+    cd ../server && npm ci --verbose || (cat /home/node/.npm/_logs/*-debug-0.log && exit 1)
+
+# Copy the rest of the application code
+COPY --chown=node:node . .
+
 EXPOSE 3000 3001
+
+ENV NODE_ENV=development \
+    NPM_CONFIG_LOGLEVEL=verbose
 
 CMD ["npm", "run", "start"] 

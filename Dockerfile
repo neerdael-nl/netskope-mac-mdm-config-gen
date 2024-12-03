@@ -4,33 +4,39 @@ FROM node:18
 # Set the working directory in the container
 WORKDIR /usr/src/app
 
-# Copy package.json files first for better caching
-COPY package*.json ./
-COPY client/package*.json ./client/
-COPY server/package*.json ./server/
+# Create a non-root user and set ownership
+RUN mkdir -p /usr/src/app/client /usr/src/app/server && \
+    mkdir -p /home/node/.npm && \
+    chown -R node:node /usr/src/app /home/node/.npm
 
-# Install dependencies
-RUN npm install && \
-    cd client && npm install && \
-    cd ../server && npm install
+# Switch to non-root user
+USER node
+
+# Copy package.json files first for better caching
+COPY --chown=node:node package*.json ./
+COPY --chown=node:node client/package*.json ./client/
+COPY --chown=node:node server/package*.json ./server/
+
+# Install dependencies with verbose logging
+RUN set -x && \
+    npm ci --verbose || (cat /home/node/.npm/_logs/*-debug-0.log && exit 1) && \
+    cd client && npm ci --verbose || (cat /home/node/.npm/_logs/*-debug-0.log && exit 1) && \
+    cd ../server && npm ci --verbose || (cat /home/node/.npm/_logs/*-debug-0.log && exit 1)
 
 # Copy the rest of the application code
-COPY . .
+COPY --chown=node:node . .
 
 # Build the React app for production
-RUN cd client && npm run build
-
-# Set permissions for the node user
-RUN chown -R node:node /usr/src/app
-
-# Switch to the node user
-USER node
+RUN cd client && \
+    export PATH="$PATH:./node_modules/.bin" && \
+    npm run build
 
 # Make port 3001 available
 EXPOSE 3001
 
 # Define environment variable
-ENV NODE_ENV=production
+ENV NODE_ENV=production \
+    NPM_CONFIG_LOGLEVEL=verbose
 
 # Start the server
 CMD ["node", "server/server.js"]
