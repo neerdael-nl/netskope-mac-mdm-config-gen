@@ -109,11 +109,6 @@ app.post('/api/generate', async (req, res) => {
       plistEmail = '{{mail}}';
     }
 
-    const customPlist = plist.build({
-      Email: plistEmail
-    });
-    archive.append(customPlist, { name: 'com.netskope.client.Netskope-Client.plist' });
-
     // Modify and add pre-install and post-install scripts
     const preInstallPath = path.join(__dirname, 'scripts', 'pre-install.sh');
     const postInstallPath = path.join(__dirname, 'scripts', 'post-install.sh');
@@ -121,30 +116,36 @@ app.post('/api/generate', async (req, res) => {
     let preInstallContent = await fsPromises.readFile(preInstallPath, 'utf8');
     let postInstallContent = await fsPromises.readFile(postInstallPath, 'utf8');
 
-    // Add the correct email fetching method to pre-install.sh
-    const emailFetchingCode = `
-# Managed domain where Netskope client settings are stored
-managedDomain="com.netskope.client.Netskope-Client"
+    // Add multi-user configuration
+    const multiUserConfig = `
+NSUSERCONFIG_JSON_FILE="/Library/Application Support/Netskope/STAgent/nsuserconfig.json"
+NSINSTPARAM_JSON_FILE="/tmp/nsbranding/nsinstparams.json"
+perusermode=${req.body.isMultiUser ? 1 : 0}
 
-# Function to safely read defaults
-read_default() {
-    local domain="$1"
-    local key="$2"
-    local value
-    value=$(defaults -currentHost read "/Library/Managed Preferences/\${domain}" "\${key}" 2>/dev/null) || value=""
-    echo "$value"
-}
-
-# Use the function to read values
-email=$(read_default "$managedDomain" "email")
-
-# If email is empty, use a default value or handle it as needed
-if [ -z "$email" ]; then
-  email="{{EMAIL}}"
+if [ $perusermode -eq 1 ]
+then
+    mkdir -p "/Library/Application Support/Netskope/STAgent"
+    
+    # Create the empty install param json file so that IDP mode will not trigger in case of any failure
+    echo -n > "${NSINSTPARAM_JSON_FILE}"
+    
+    addonUrl="addon-${tenantName}.${topLevelDomain}"
+    echo "Addonman url is $addonUrl"
+    
+    if [[ $addonUrl != addon-* ]]; then
+        echo "Addonman url does not start with addon-"
+        exit 1
+    fi
+    
+    orgkey="${organizationKey}"
+    
+    echo "{\\\"nsUserConfig\\\":{\\\"enablePerUserConfig\\\": \\\"true\\\", \\\"configLocation\\\": \\\"~/Library/Application Support/Netskope/STAgent\\\", \\\"token\\\": \\\"$orgkey\\\", \\\"host\\\": \\\"$addonUrl\\\",\\\"autoupdate\\\": \\\"true\\\"}}" > "${NSUSERCONFIG_JSON_FILE}"
+    
+    exit 0
 fi
 `;
 
-    preInstallContent = emailFetchingCode + preInstallContent;
+    preInstallContent = preInstallContent.replace('log "Pre-installation script completed successfully."', multiUserConfig + '\nlog "Pre-installation script completed successfully."');
 
     // Replace placeholders in scripts
     const replacements = {
@@ -163,6 +164,24 @@ fi
 
     archive.append(preInstallContent, { name: 'pre-install.sh' });
     archive.append(postInstallContent, { name: 'post-install.sh' });
+
+    // Modify the plist generation for Intune
+    if (mdmPlatform === 'Microsoft Intune') {
+      const intuneContent = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+<key>Email</key>
+<string>{{mail}}</string>
+</dict>
+</plist>`;
+      archive.append(intuneContent, { name: 'com.netskope.client.Netskope-Client.plist' });
+    } else {
+      const customPlist = plist.build({
+        Email: plistEmail
+      });
+      archive.append(customPlist, { name: 'com.netskope.client.Netskope-Client.plist' });
+    }
 
     archive.finalize();
 

@@ -12,7 +12,8 @@ function App() {
     organizationKey: '',
     enrollmentAuthToken: '',
     enrollmentEncryptionToken: '',
-    email: ''
+    email: '',
+    isMultiUser: false,
   });
   const [errors, setErrors] = useState({});
 
@@ -160,6 +161,23 @@ function App() {
               placeholder="Enter email for development and testing purposes only"
             />
             {errors.email && <div className="error">{errors.email}</div>}
+          </div>
+          <div className="form-group">
+            <label htmlFor="isMultiUser">
+              <input
+                type="checkbox"
+                id="isMultiUser"
+                name="isMultiUser"
+                checked={formData.isMultiUser}
+                onChange={(e) => handleChange({
+                  target: {
+                    name: 'isMultiUser',
+                    value: e.target.checked
+                  }
+                })}
+              />
+              Enable Multi-User Mode
+            </label>
           </div>
           <button type="submit" disabled={!isFormValid}>Generate Configuration</button>
         </form>

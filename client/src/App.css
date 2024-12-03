@@ -113,3 +113,14 @@ body {
   .disclaimer a:hover {
     text-decoration: underline;
   }
+
+  .form-group input[type="checkbox"] {
+    margin-right: 8px;
+    width: auto;
+  }
+
+  .form-group label[for="isMultiUser"] {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
