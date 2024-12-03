@@ -6,8 +6,11 @@ services:
       - "3001:3001"
     environment:
       - NODE_ENV=production
+      - CHOKIDAR_USEPOLLING=true
     volumes:
       - ./client:/usr/src/app/client
       - ./server:/usr/src/app/server
       - /usr/src/app/client/node_modules
       - /usr/src/app/server/node_modules
+    command: >
+      sh -c "cd client && npm run build && cd .. && node server/server.js"

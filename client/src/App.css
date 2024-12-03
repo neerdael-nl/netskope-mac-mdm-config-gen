@@ -139,6 +139,7 @@ body {
   }
 
   .checkbox-label span {
+    -webkit-user-select: none;
     user-select: none;
   }
 
