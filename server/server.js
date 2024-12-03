@@ -37,6 +37,7 @@ const generatedFiles = new Map();
  * /api/generate:
  *   post:
  *     summary: Generate configuration files
+ *     description: Generates MDM configuration files for Netskope deployment with optional multi-user support
  *     requestBody:
  *       required: true
  *       content:
@@ -47,26 +48,60 @@ const generatedFiles = new Map();
  *               mdmPlatform:
  *                 type: string
  *                 enum: [JAMF, 'Workspace ONE', 'Microsoft Intune', Kandji]
+ *                 description: The MDM platform to generate configuration for
  *               tenantName:
  *                 type: string
+ *                 description: Tenant name (e.g., 'john' for john.goskope.com)
  *               topLevelDomain:
  *                 type: string
+ *                 description: Top level domain for the tenant
  *               organizationKey:
  *                 type: string
+ *                 description: Organization ID/Key
  *               enrollmentAuthToken:
  *                 type: string
+ *                 description: Optional enrollment authentication token
  *               enrollmentEncryptionToken:
  *                 type: string
+ *                 description: Optional enrollment encryption token
  *               email:
  *                 type: string
+ *                 description: Optional email for development and testing
+ *               isMultiUser:
+ *                 type: boolean
+ *                 description: Whether to enable multi-user configuration mode
+ *                 default: false
+ *             required:
+ *               - mdmPlatform
+ *               - tenantName
+ *               - topLevelDomain
+ *               - organizationKey
+ *             example:
+ *               mdmPlatform: "Microsoft Intune"
+ *               tenantName: "john"
+ *               topLevelDomain: "goskope.com"
+ *               organizationKey: "abc123"
+ *               enrollmentAuthToken: "auth123"
+ *               enrollmentEncryptionToken: "enc456"
+ *               email: "test@example.com"
+ *               isMultiUser: false
  *     responses:
  *       200:
- *         description: Successful response with zip file
+ *         description: Successful response with zip file containing configuration
  *         content:
  *           application/zip:
  *             schema:
  *               type: string
  *               format: binary
+ *       400:
+ *         description: Invalid request parameters
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
  *       500:
  *         description: Internal server error
  *         content:
