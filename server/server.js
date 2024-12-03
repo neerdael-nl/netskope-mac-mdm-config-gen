@@ -186,14 +186,8 @@ perusermode=${isMultiUser ? 1 : 0}
 
     // Modify the plist generation for Intune
     if (mdmPlatform === 'Microsoft Intune') {
-      const intuneContent = `<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-<key>Email</key>
-<string>{{mail}}</string>
-</dict>
-</plist>`;
+      const intuneContent = `<key>Email</key>
+<string>{{mail}}</string>`;
       archive.append(intuneContent, { name: 'com.netskope.client.Netskope-Client.plist' });
     } else {
       const customPlist = plist.build({

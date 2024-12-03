@@ -156,15 +156,17 @@ body {
 
   .form-group.multi-user-section {
     border-top: 1px solid #444;
-    padding-top: 1.5rem;
-    margin-top: 1.5rem;
+    padding-top: 2rem;
+    margin-top: 2rem;
   }
 
   .radio-group {
     display: flex;
     flex-direction: row;
-    gap: 1rem;
-    justify-content: space-between;
+    gap: 2rem;
+    justify-content: center;
+    margin: 0 auto;
+    max-width: 600px;
   }
 
   .radio-label {
@@ -173,11 +175,13 @@ body {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    padding: 1rem;
-    border: 1px solid #444;
-    border-radius: 4px;
-    transition: border-color 0.2s, background-color 0.2s;
+    padding: 1.5rem;
+    border: 2px solid #444;
+    border-radius: 8px;
+    transition: all 0.2s ease;
     text-align: center;
+    min-width: 200px;
+    position: relative;
   }
 
   .radio-label:hover {
@@ -188,25 +192,31 @@ body {
   .radio-label.selected {
     border-color: #61dafb;
     background-color: rgba(97, 218, 251, 0.1);
+    box-shadow: 0 0 0 1px #61dafb;
   }
 
   .radio-label input[type="radio"] {
-    margin-right: 8px;
+    position: absolute;
+    top: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
   }
 
   .radio-label > div {
-    display: flex;
-    align-items: center;
+    margin-top: 1.5rem;
   }
 
   .radio-label span {
+    font-size: 1.2rem;
     font-weight: bold;
     margin: 0;
+    color: #ffffff;
   }
 
   h3 {
     color: #61dafb;
-    font-size: 1.1rem;
-    margin-bottom: 1rem;
+    font-size: 1.3rem;
+    margin-bottom: 2rem;
     text-align: center;
   }
