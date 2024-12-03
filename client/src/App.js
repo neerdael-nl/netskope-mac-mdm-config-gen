@@ -162,22 +162,50 @@ function App() {
             />
             {errors.email && <div className="error">{errors.email}</div>}
           </div>
-          <div className="form-group">
-            <label htmlFor="isMultiUser">
-              <input
-                type="checkbox"
-                id="isMultiUser"
-                name="isMultiUser"
-                checked={formData.isMultiUser}
-                onChange={(e) => handleChange({
-                  target: {
-                    name: 'isMultiUser',
-                    value: e.target.checked
-                  }
-                })}
-              />
-              Enable Multi-User Mode
-            </label>
+          <div className="form-group multi-user-section">
+            <h3>Configuration Type</h3>
+            <div className="radio-group">
+              <label className="radio-label">
+                <input
+                  type="radio"
+                  name="configType"
+                  checked={!formData.isMultiUser}
+                  onChange={() => handleChange({
+                    target: {
+                      name: 'isMultiUser',
+                      value: false
+                    }
+                  })}
+                />
+                <div>
+                  <span>System-Wide Configuration</span>
+                  <div className="help-text">
+                    Use this for single-user devices or when all users should share the same configuration.
+                  </div>
+                </div>
+              </label>
+              
+              <label className="radio-label">
+                <input
+                  type="radio"
+                  name="configType"
+                  checked={formData.isMultiUser}
+                  onChange={() => handleChange({
+                    target: {
+                      name: 'isMultiUser',
+                      value: true
+                    }
+                  })}
+                />
+                <div>
+                  <span>Per-User Configuration</span>
+                  <div className="help-text">
+                    Use this when multiple users share the device and need separate configurations.
+                    Configuration will be stored in user-specific directories.
+                  </div>
+                </div>
+              </label>
+            </div>
           </div>
           <button type="submit" disabled={!isFormValid}>Generate Configuration</button>
         </form>

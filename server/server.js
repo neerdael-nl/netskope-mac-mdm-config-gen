@@ -79,7 +79,7 @@ const generatedFiles = new Map();
  */
 app.post('/api/generate', async (req, res) => {
   console.log('Received generate request:', req.body);
-  const { mdmPlatform, tenantName, topLevelDomain, organizationKey, enrollmentAuthToken, enrollmentEncryptionToken, email } = req.body;
+  const { mdmPlatform, tenantName, topLevelDomain, organizationKey, enrollmentAuthToken, enrollmentEncryptionToken, email, isMultiUser } = req.body;
 
   try {
     const archive = archiver('zip', { zlib: { level: 9 } });
@@ -118,9 +118,10 @@ app.post('/api/generate', async (req, res) => {
 
     // Add multi-user configuration
     const multiUserConfig = `
+# Multi-user configuration
 NSUSERCONFIG_JSON_FILE="/Library/Application Support/Netskope/STAgent/nsuserconfig.json"
 NSINSTPARAM_JSON_FILE="/tmp/nsbranding/nsinstparams.json"
-perusermode=${req.body.isMultiUser ? 1 : 0}
+perusermode=${isMultiUser ? 1 : 0}
 
 if [ $perusermode -eq 1 ]
 then
@@ -145,12 +146,18 @@ then
 fi
 `;
 
-    preInstallContent = preInstallContent.replace('log "Pre-installation script completed successfully."', multiUserConfig + '\nlog "Pre-installation script completed successfully."');
+    // Insert the multi-user configuration before the last line of the pre-install script
+    const lastNewlineIndex = preInstallContent.lastIndexOf('\n');
+    preInstallContent = 
+      preInstallContent.slice(0, lastNewlineIndex) + 
+      '\n' + 
+      multiUserConfig + 
+      preInstallContent.slice(lastNewlineIndex);
 
     // Replace placeholders in scripts
     const replacements = {
       '{{TENANT_HOST_NAME}}': `addon-${tenantName}.${topLevelDomain}`,
-      '{{EMAIL}}': plistEmail, // Use the plistEmail value, which includes platform-specific placeholders
+      '{{EMAIL}}': plistEmail,
       '{{ORGANIZATION_KEY}}': organizationKey,
       '{{ENROLLMENT_AUTH_TOKEN}}': enrollmentAuthToken || '',
       '{{ENROLLMENT_ENCRYPTION_TOKEN}}': enrollmentEncryptionToken || '',
