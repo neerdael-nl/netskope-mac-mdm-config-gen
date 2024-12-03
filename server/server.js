@@ -122,19 +122,18 @@ app.post('/api/generate', async (req, res) => {
     let preInstallContent = await fsPromises.readFile(preInstallPath, 'utf8');
     let postInstallContent = await fsPromises.readFile(postInstallPath, 'utf8');
 
-    // Add multi-user configuration
+    // Modify the multi-user configuration section
     const multiUserConfig = `
 # Multi-user configuration
-NSUSERCONFIG_JSON_FILE="/Library/Application Support/Netskope/STAgent/nsuserconfig.json"
-NSINSTPARAM_JSON_FILE="/tmp/nsbranding/nsinstparams.json"
-perusermode=${isMultiUser ? 1 : 0}
-
 if [ $perusermode -eq 1 ]
 then
+    NSUSERCONFIG_JSON_FILE="/Library/Application Support/Netskope/STAgent/nsuserconfig.json"
+    NSINSTPARAM_JSON_FILE="/tmp/nsbranding/nsinstparams.json"
+    
     mkdir -p "/Library/Application Support/Netskope/STAgent"
     
     # Create the empty install param json file so that IDP mode will not trigger in case of any failure
-    echo -n > "${NSINSTPARAM_JSON_FILE}"
+    echo -n > "$NSINSTPARAM_JSON_FILE"
     
     addonUrl="addon-${tenantName}.${topLevelDomain}"
     echo "Addonman url is $addonUrl"
@@ -146,17 +145,24 @@ then
     
     orgkey="${organizationKey}"
     
-    echo "{\\\"nsUserConfig\\\":{\\\"enablePerUserConfig\\\": \\\"true\\\", \\\"configLocation\\\": \\\"~/Library/Application Support/Netskope/STAgent\\\", \\\"token\\\": \\\"$orgkey\\\", \\\"host\\\": \\\"$addonUrl\\\",\\\"autoupdate\\\": \\\"true\\\"}}" > "${NSUSERCONFIG_JSON_FILE}"
+    echo "{\\\"nsUserConfig\\\":{\\\"enablePerUserConfig\\\": \\\"true\\\", \\\"configLocation\\\": \\\"~/Library/Application Support/Netskope/STAgent\\\", \\\"token\\\": \\\"$orgkey\\\", \\\"host\\\": \\\"$addonUrl\\\",\\\"autoupdate\\\": \\\"true\\\"}}" > "$NSUSERCONFIG_JSON_FILE"
     
     exit 0
 fi
 `;
 
-    // Insert the multi-user configuration before the last line of the pre-install script
+    // Add this before the multi-user configuration in the pre-install script
+    const modeConfig = `
+# Set per-user mode
+perusermode=${isMultiUser ? 1 : 0}
+`;
+
+    // Insert both configurations before the last line
     const lastNewlineIndex = preInstallContent.lastIndexOf('\n');
     preInstallContent = 
       preInstallContent.slice(0, lastNewlineIndex) + 
       '\n' + 
+      modeConfig +
       multiUserConfig + 
       preInstallContent.slice(lastNewlineIndex);
 
