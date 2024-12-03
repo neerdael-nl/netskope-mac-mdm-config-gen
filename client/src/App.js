@@ -163,9 +163,9 @@ function App() {
             {errors.email && <div className="error">{errors.email}</div>}
           </div>
           <div className="form-group multi-user-section">
-            <h3>Configuration Type</h3>
+            <h3>Configuration Mode</h3>
             <div className="radio-group">
-              <label className="radio-label">
+              <label className={`radio-label ${!formData.isMultiUser ? 'selected' : ''}`}>
                 <input
                   type="radio"
                   name="configType"
@@ -178,14 +178,11 @@ function App() {
                   })}
                 />
                 <div>
-                  <span>System-Wide Configuration</span>
-                  <div className="help-text">
-                    Use this for single-user devices or when all users should share the same configuration.
-                  </div>
+                  <span>Single-User Mode</span>
                 </div>
               </label>
               
-              <label className="radio-label">
+              <label className={`radio-label ${formData.isMultiUser ? 'selected' : ''}`}>
                 <input
                   type="radio"
                   name="configType"
@@ -198,11 +195,7 @@ function App() {
                   })}
                 />
                 <div>
-                  <span>Per-User Configuration</span>
-                  <div className="help-text">
-                    Use this when multiple users share the device and need separate configurations.
-                    Configuration will be stored in user-specific directories.
-                  </div>
+                  <span>Multi-User Mode</span>
                 </div>
               </label>
             </div>

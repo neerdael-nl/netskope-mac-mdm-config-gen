@@ -81,9 +81,15 @@ app.post('/api/generate', async (req, res) => {
   console.log('Received generate request:', req.body);
   const { mdmPlatform, tenantName, topLevelDomain, organizationKey, enrollmentAuthToken, enrollmentEncryptionToken, email, isMultiUser } = req.body;
 
+  // Create temp directory if it doesn't exist
+  const tempDir = path.join(__dirname, 'temp');
+  if (!fs.existsSync(tempDir)) {
+    fs.mkdirSync(tempDir);
+  }
+
   try {
     const archive = archiver('zip', { zlib: { level: 9 } });
-    const output = fs.createWriteStream(path.join(__dirname, 'temp', `${uuidv4()}.zip`));
+    const output = fs.createWriteStream(path.join(tempDir, `${uuidv4()}.zip`));
     
     archive.pipe(output);
 
